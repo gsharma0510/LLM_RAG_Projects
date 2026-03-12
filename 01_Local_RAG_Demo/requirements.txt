@@ -1,0 +1,7 @@
+pypdf
+psutil
+tqdm
+sentence-transformers
+faiss-cpu
+numpy
+ollama

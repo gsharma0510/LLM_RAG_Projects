@@ -1,0 +1,17 @@
+# Environments
+.conda/
+venv/
+env/
+
+# Python / Notebooks
+__pycache__/
+.ipynb_checkpoints/
+
+# Data & AI Models (Keep your repo light)
+*.pdf
+*.faiss
+*.pkl
+
+# OS stuff
+.DS_Store
+Thumbs.db
