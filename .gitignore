@@ -2,6 +2,7 @@
 .conda/
 venv/
 env/
+/Venv_Activation_Instruction.md
 
 # Python / Notebooks
 __pycache__/
