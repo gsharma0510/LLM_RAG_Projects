@@ -1,0 +1,21 @@
+# --- Document Processing ---
+pypandoc
+unstructured[epub]
+
+# --- Vector Database & Math ---
+faiss-cpu
+numpy
+
+# --- LangChain Ecosystem ---
+langchain
+langchain-community
+langchain-huggingface
+langchain-text-splitters
+
+# --- Machine Learning & Transformers ---
+torch
+transformers
+sentence-transformers
+
+# --- API & Utilities ---
+requests

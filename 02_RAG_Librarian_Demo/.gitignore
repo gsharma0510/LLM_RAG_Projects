@@ -1,0 +1,15 @@
+# Exclude the vector database
+faiss_librarian_index/
+
+# Exclude installers and binaries
+*.msi
+*.exe
+
+# Exclude the book data (to avoid copyright/size issues)
+Library/
+
+# Exclude python environment and cache
+__pycache__/
+.conda/
+.venv/
+.ipynb_checkpoints/
