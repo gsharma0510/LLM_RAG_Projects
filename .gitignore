@@ -16,3 +16,6 @@ __pycache__/
 # OS stuff
 .DS_Store
 Thumbs.db
+
+# Colab Notebook Processing for GitHub
+Colab_To_GitFriendly.ipynb
