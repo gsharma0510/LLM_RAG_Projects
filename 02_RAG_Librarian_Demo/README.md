@@ -1,61 +1,82 @@
-# The RAG Librarian
-This project is a high-resolution Retrieval-Augmented Generation (RAG) system designed to navigate and query complex literary works. Unlike standard RAG pipelines that often lose context in dense narratives, this modular Librarian uses a "Surgical Search" approach combined with "Neighbor Retrieval" to ensure the LLM understands not just the words, but the narrative moment.
+# 📚 The RAG Librarian
 
-## 🚀 Key Features
-***Surgical Filtering***: Uses LLM-generated keywords to filter vector search results, eliminating "Semantic Drift" where the AI gets distracted by similar descriptions in the wrong chapters.
+A high-resolution Retrieval-Augmented Generation (RAG) system designed to navigate complex literary works. This project evolved from a local CPU script into a **High-Performance Cloud Orchestrator** capable of running 7B-parameter models on constrained hardware (NVIDIA T4 15GB).
 
-***Neighbor Retrieval***: When a relevant "needle" is found, the system automatically pulls the preceding and following chunks to provide the LLM with full narrative context (Description + Action + Dialogue).
+## 🚀 The "Surgical Search" Evolution
+Unlike standard RAG pipelines that lose context in dense narratives, this Librarian uses a three-tier optimization strategy:
 
-***Local-First Architecture***: Runs entirely on local hardware using FAISS, Hugging Face Transformers, and Ollama, ensuring privacy and no API costs.
+1. **Keyword Gating**: Uses LLM-generated "Surgical Anchors" to filter vector results, eliminating semantic drift.
+2. **O(1) Neighbor Retrieval**: Replaces slow linear list-scanning with a **Dictionary Lookup Map**, turning a 90-second context-stitching bottleneck into a near-instant operation.
+3. **Dynamic VRAM Handshake**: Manages GPU memory by swapping the Reranker and the LLM via `torch.cuda.empty_cache()`, allowing 7B models to fit on 15GB VRAM.
 
-***Hybrid Reranking***: Combines the speed of BGE-Small embeddings with the deep reasoning of a BGE-Base Cross-Encoder reranker.
+## 🧪 Model Performance Benchmarks
+Tested on **Les Misérables** (approx. 4,700 chunks) using an NVIDIA T4 GPU:
+
+| Notebook | Model | Latency | Reasoning Quality |
+| :--- | :--- | :--- | :--- |
+| `..._GPU_Phi35.ipynb` | **Phi-3.5 Mini (3.8B)** | **~75s** | **Elite**: Poetic, symbolic, and descriptive. |
+| `..._GPU_Mistral7B.ipynb` | **Mistral 7B v0.3** | **~86s** | **High**: Analytical and deeply grounded. |
+| `..._GPU.ipynb` | **Llama 3.2 (3B)** | **~81s** | **Good**: Fast and factually reliable. |
+
+---
 
 ## 📁 Project Structure
-
-```
+```text
 02_RAG_Librarian_Demo/
-├── Library/                         # Source epubs/text organized by Author
-├── faiss_librarian_index/           # Local vector database (Git ignored)
-├── RAG_Librarian_Demo_Notebook.ipynb # Main pipeline logic
-├── requirements.txt                 # Python dependencies
-└── .gitignore                       # Project-specific exclusion rules
+├── Library/                          # Source EPUBs/Text organized by Author
+├── faiss_librarian_index/            # Persistent FAISS vector database
+├── RAG_Librarian_Demo_Notebook_GPU_Phi35.ipynb    # Latest: Long-Context optimized
+├── RAG_Librarian_Demo_Notebook_GPU_Mistral7B.ipynb # High-Reasoning 7B variant
+├── RAG_Librarian_Demo_Notebook_GPU.ipynb           # Standard 3B Cloud variant
+└── requirements.txt                  # Updated for BitsAndBytes & Transformers 2026
 ```
+---
 
 ## 🛠️ Technical Stack
 
-**Vector Store**: *FAISS (FlatL2/Inner Product)*
+- **LLM Engines**: Mistral 7B v0.3, Phi-3.5 Mini (3.8B), Llama 3.2  
+- **Vector Store**: FAISS (FlatL2)  
+- **Embeddings**: BAAI/bge-small-en-v1.5  
+- **Reranker**: BAAI/bge-reranker-base (GPU-Accelerated)  
+- **Optimization**: 4-bit NF4 Quantization + Gradient Checkpointing  
 
-**Embeddings**: *BAAI/bge-small-en-v1.5*
+---
 
-**Reranker**: *BAAI/bge-reranker-base*
+## ⚙️ The Pipeline Logic
 
-**LLM Engine**: *Ollama (Running llama3.2:1b)*
+- **Ingestion**: 1200-char chunks with 300-char "Semantic Bridges" (overlap)  
+- **Analyst Phase**: LLM extracts 5 verbatim anchors from the query using a strict chat template  
+- **Surgical Search**: FAISS retrieves top 100; only those containing keywords survive  
+- **Context Stitching**: O(1) lookup retrieves neighbors (radius 1–2) to reconstruct the scene  
+- **GPU Handshake**: Reranker scores context, then clears VRAM for the LLM  
+- **Synthesis**: The "Librarian" provides a grounded, literary answer with source metadata citations  
 
-**Document Processing**: *UnstructuredEPubLoader & Pandoc*
+---
 
-## ⚙️ How It Works
+## 🔧 Setup
 
-**Ingestion**: Books are split into 1200-character chunks with a 300-character overlap.
+- **Hardware**: Recommended NVIDIA T4 (Google Colab / Kaggle)  
+- **Install Pandoc**: Required for EPUB processing  
 
-**Keyword Assistance**: The user's query is processed by a local LLM to extract unique identifiers (e.g., "Digne", "Passport").
-
-**Vector Search**: FAISS retrieves the top 100 candidate chunks.
-
-**Surgical Filter**: Chunks are stripped away if they do not contain the assistant's keywords.
-
-**Context Expansion**: The system identifies the original_index of surviving chunks and retrieves their neighbors to fill in descriptive gaps.
-
-**Reranking & Synthesis**: The Cross-Encoder ranks the expanded contexts, and the final top results are sent to Llama 3.2 for a precise, literary answer.
-
-## 🔧 Setup & Installation
-
-* **Install Pandoc**: Required for epub processing.
-
-* **Setup Environment**:
-```
-Bash
+- **Dependencies**:
+```bash
 pip install -r requirements.txt
 ```
-* **Run Ollama**: Ensure Ollama is running locally with the command ollama run llama3.2:1b.
+- **Model Note**:  
+  Phi-3.5 requires `trust_remote_code=False` to maintain compatibility with modern DynamicCache implementations.
 
-* **Index Your Library**: Run the ingestion cells in the notebook to create your faiss_librarian_index.
+---
+
+## 📚 Literary Benchmarking: The "Gavroche" Test
+
+To demonstrate the "Semantic Leap" between models, we asked:
+
+> *"Describe the moment Gavroche was singing at the barricade while collecting cartridges. What was the 'will-o'-the-wisp' comparison?"*
+
+| Model | Response Style | Depth of Analysis |
+|-------|----------------|------------------|
+| **Llama 3.2 (1B/3B)** | Functional | Identifies the scene and action, focuses on the "what" but misses deeper metaphor |
+| **Mistral 7B v0.3** | Analytical | Explains the metaphor as elusiveness and battlefield frustration |
+| **Phi-3.5 Mini** | Poetic / Symbolic | **Librarian’s Choice**: Connects to folklore and portrays a "trickster archetype" |
+
+These results highlight the importance of model selection in Retrieval-Augmented Generation systems. While smaller models like Llama 3.2 provide fast and reliable factual grounding, larger or more specialized models such as Mistral 7B and Phi-3.5 Mini demonstrate a clear advantage in interpretive depth and contextual reasoning. In literary applications, where nuance, symbolism, and narrative understanding are critical, this difference becomes especially pronounced, positioning Phi-3.5 Mini as the preferred choice for high-quality, human-like synthesis despite similar latency constraints.
